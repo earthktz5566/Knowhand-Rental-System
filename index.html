@@ -8,103 +8,92 @@
   <meta name="description" content="รู้มือ (Know Hand Rental House) — เช็คของว่างและจองอุปกรณ์ถ่ายทำ">
   <meta name="robots" content="noindex">
 
+  <!-- ฟอนต์ไทย: ใช้ตัวเดียวกับตัวระบบ (IBM Plex Sans Thai) — ไม่งั้นบางเครื่องตัวอักษรไทยเป็นกล่อง -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <!-- ============================================================
-       index.html — ตัว "ห่อ" หน้าจองของระบบรู้มือ (Apps Script Web App)
-       หลักการ: เต็มจอ 1 iframe → address bar โชว์โดเมนของเรา (github.io / subdomain ตัวเอง)
-       ⚠️ ต้องให้ฝั่ง Apps Script ตั้ง setXFrameOptionsMode(ALLOWALL) เท่านั้น (ระบบรู้มือตั้งไว้แล้ว)
-       ⚠️ ถ้าถูกบล็อก (in-app browser ของ FB/IG/LINE/TikTok) จะขึ้นปุ่ม "เปิดหน้าจองเลย" ให้แทน
+       index.html — หน้า "ประตูเข้า" ของร้านรู้มือ (GitHub Pages)
+       ⚠️ เดิมใช้ iframe ห่อหน้าจอง → ทดสอบแล้ว "ไม่ได้" :
+          หน้าของ Apps Script ไม่เรนเดอร์ใน iframe ของเว็บอื่น (จอว่าง)
+          → เปลี่ยนเป็นหน้า landing + ปุ่มเปิดหน้าจอง (ลิงก์ตรง) แทน
+          ถ้าอยากได้ URL สวยแบบ "redirect เงียบ" ให้ใช้ไฟล์ redirect.html
        ============================================================ -->
-
   <style>
-    :root { --bg:#0B0F14; --card:#121821; --text:#E7ECF3; --soft:#9AA6B6; --accent:#25BB89; --ink:#0B0F14; }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; height: 100%; background: var(--bg); color: var(--text);
-                 font-family: system-ui, -apple-system, 'Segoe UI', 'Noto Sans Thai', sans-serif; }
-    #app { position: fixed; inset: 0; }
-    iframe { width: 100%; height: 100%; border: 0; display: block; background: var(--bg); }
-
-    /* ---- splash ระหว่างรอ ---- */
-    #splash {
-      position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 14px; text-align: center; padding: 24px;
-      background: var(--bg); transition: opacity .35s ease;
-    }
-    #splash.hide { opacity: 0; pointer-events: none; }
-    .mark {
-      width: 58px; height: 58px; border-radius: 16px; background: var(--accent); color: var(--ink);
-      display: grid; place-items: center; font-weight: 800; font-size: 30px; line-height: 1;
-    }
-    #splash h1 { margin: 4px 0 0; font-size: 20px; }
-    #splash p { margin: 0; color: var(--soft); font-size: 14px; }
-    .spin { width: 28px; height: 28px; border-radius: 50%; border: 3px solid rgba(37,187,137,.25);
-            border-top-color: var(--accent); animation: sp .8s linear infinite; }
-    @keyframes sp { to { transform: rotate(360deg); } }
-    /* ---- ปุ่มเปิดในเบราว์เซอร์จริง (มุมขวาล่าง เหนือแถบตะกร้าของแอป) ---- */
-    .escape {
-      position: fixed; right: 12px; bottom: calc(88px + env(safe-area-inset-bottom));
-      z-index: 20; display: inline-flex; align-items: center; gap: 6px;
-      padding: 7px 12px; border-radius: 999px; font-size: 12px; font-weight: 600;
-      background: rgba(18,24,33,.9); color: var(--soft); border: 1px solid #3D4A5C;
-      text-decoration: none; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-      opacity: .9;
-    }
-    .escape:active { opacity: 1; color: var(--text); }
-    .hidden { display: none !important; }
-
+    :root { --bg:#0B0F14; --card:#121821; --elev:#1A222D; --text:#E7ECF3; --soft:#9AA6B6;
+            --muted:#6D7A8C; --accent:#25BB89; --accent-hi:#3BD8A4; --ink:#0B0F14; --border:#2B3542; --border-strong:#3D4A5C; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; padding: 0; min-height: 100%; background: var(--bg); color: var(--text);
+                 font-family: 'IBM Plex Sans Thai', 'Sarabun', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+    .wrap { max-width: 460px; margin: 0 auto; padding: 28px 20px calc(28px + env(safe-area-inset-bottom)); }
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; }
+    .mark { width: 54px; height: 54px; border-radius: 15px; background: var(--accent); color: var(--ink);
+            display: grid; place-items: center; font-weight: 800; font-size: 26px; flex: 0 0 auto; }
+    .brand-txt strong { display: block; font-size: 22px; line-height: 1.2; }
+    .brand-txt span { display: block; font-size: 13px; color: var(--soft); letter-spacing: .02em; }
+    h1 { font-size: 21px; margin: 0 0 6px; }
+    .lead { color: var(--soft); font-size: 14.5px; line-height: 1.6; margin: 0 0 22px; }
+    .btn { display: flex; align-items: center; justify-content: center; gap: 10px;
+           padding: 16px 18px; border-radius: 13px; font-size: 17px; font-weight: 700;
+           text-decoration: none; margin-bottom: 12px; }
+    .btn-main { background: var(--accent); color: var(--ink); }
+    .btn-main:active { background: var(--accent-hi); }
+    .btn-ghost { background: var(--elev); color: var(--text); border: 1px solid var(--border-strong); font-weight: 600; }
+    .btn-line { background: #06C755; color: #fff; font-weight: 700; }
+    .note { margin-top: 20px; padding: 12px 14px; border-radius: 11px; background: var(--card);
+            border: 1px solid var(--border); color: var(--soft); font-size: 13px; line-height: 1.65; }
+    .note b { color: var(--text); }
+    .foot { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);
+            color: var(--muted); font-size: 12.5px; line-height: 1.8; }
+    .foot a { color: var(--accent); text-decoration: none; }
   </style>
 </head>
 <body>
+<div class="wrap">
 
-<div id="app">
-  <!-- หน้าจองของระบบ (Apps Script) — เปลี่ยน URL ตรงนี้ที่เดียวถ้าย้าย deployment -->
-  <iframe id="appFrame"
-    src="https://script.google.com/macros/s/AKfycbw3tb3vx_twzRT2obFNK3oLLJfu0f4Kjw2iS7CJrFkxX_5Y1xNKnPiFeZrTMkdvzbE7/exec?p=public"
-    allow="clipboard-write" referrerpolicy="no-referrer-when-downgrade"
-    title="หน้าจองอุปกรณ์ รู้มือ"></iframe>
+  <div class="brand">
+    <div class="mark">ร</div>
+    <div class="brand-txt">
+      <strong>รู้มือ</strong>
+      <span>Know Hand Rental House</span>
+    </div>
+  </div>
+
+  <h1>เช็คของว่าง &amp; จองอุปกรณ์ถ่ายทำ</h1>
+  <p class="lead">เลือกรุ่น + วันรับ–คืน ดูราคาและของว่างแบบเรียลไทม์ แล้วส่งคำขอจองได้เลย — ไม่ต้องสมัครสมาชิก</p>
+
+  <!-- ▶ ปุ่มหลัก: เปิดหน้าจองของระบบ (Apps Script) -->
+  <a class="btn btn-main" id="goBook"
+     href="https://script.google.com/macros/s/AKfycbw3tb3vx_twzRT2obFNK3oLLJfu0f4Kjw2iS7CJrFkxX_5Y1xNKnPiFeZrTMkdvzbE7/exec?p=public">🛒 เปิดหน้าจอง / เช็คของว่าง</a>
+
+  <a class="btn btn-ghost" id="goStatus"
+     href="https://script.google.com/macros/s/AKfycbw3tb3vx_twzRT2obFNK3oLLJfu0f4Kjw2iS7CJrFkxX_5Y1xNKnPiFeZrTMkdvzbE7/exec?p=public">📋 ดูรายการของร้านทั้งหมด</a>
+
+  <a class="btn btn-line" href="https://line.me/R/ti/p/@971fxzun" target="_blank" rel="noopener">💬 ทัก LINE ร้าน (@971fxzun)</a>
+
+  <div class="note">
+    <b>เปิดครั้งแรกช้า 2–3 วินาที</b> เป็นเรื่องปกติ (ระบบดึงข้อมูลจากชีต)<br>
+    ควรเปิดด้วย <b>Chrome / Safari</b> — ถ้าเปิดจากในแอป Facebook/IG/LINE แล้วจอว่าง ให้กด ⋯ มุมขวาบน → <b>“เปิดในเบราว์เซอร์”</b>
+  </div>
+
+  <div class="foot">
+    รู้มือ · Know Hand Rental House<br>
+    เปิดทุกวัน 09:00–19:00 น. · โทร <a href="tel:0634537057">063-453-7057</a>
+  </div>
+
 </div>
-
-<div id="splash">
-  <!-- ถ้าต้องการใช้โลโก้รูป: ใส่ URL แล้วแทน .mark ด้านล่างด้วย <img src="..." style="height:56px"> -->
-  <div class="mark">ร</div>
-  <h1>รู้มือ · Know Hand Rental House</h1>
-  <p>กำลังเปิดหน้าจอง…</p>
-  <div class="spin" id="spin"></div>
-
-</div>
-
-<!-- ทางออกสำรอง: โผล่เมื่อแอปไม่ยืนยันว่าโหลดสำเร็จ (เช่นถูกบล็อกใน in-app browser) -->
-<a class="escape" id="escape" target="_top" rel="noopener">↗ เปิดในเบราว์เซอร์</a>
 
 <script>
-(function () {
-  var APP_URL = document.getElementById('appFrame').src;
-  var LINE_URL = 'https://line.me/R/ti/p/@971fxzun';
-  var splash = document.getElementById('splash');
-  var loaded = false;
-
-  document.getElementById('escape').href = APP_URL;
-
-  var frame = document.getElementById('appFrame');
-
-  function ok() {
-    loaded = true;
-    splash.classList.add('hide');
-    setTimeout(function () { splash.style.display = 'none'; }, 400);
-  }
-
-  // 1) ถ้าแอป (Apps Script) ส่งสัญญาณ postMessage มาว่าโหลดเสร็จ → ซ่อน splash เร็วขึ้น
-  window.addEventListener('message', function (e) {
-    var d = e && e.data;
-    if (d && typeof d === 'object' && d.kh === 'ready') ok();
-  });
-
-  // 2) ทางสำรอง: iframe ยิง load แล้วรออีกนิด → ถือว่าเปิดได้ (ไม่ค้าง splash ให้ผู้ใช้งง)
-  frame.addEventListener('load', function () { setTimeout(ok, 1200); });
-
-  // 3) กันเหนียว: ไม่ว่าเกิดอะไร อย่าให้ค้างหน้า splash เกิน 10 วิ
-  setTimeout(ok, 10000);
-  // 4) ปุ่ม "เปิดในเบราว์เซอร์" โชว์ตลอด (เล็ก มุมขวาล่าง เหนือแถบตะกร้า) — ทางหนีกรณีถูกบล็อก/หน้าว่าง
-})();
+  // เก็บ UTM/แคมเปญจากลิงก์ที่แชร์ → ส่งต่อไปยังหน้าจอง (เผื่ออนาคตอยากรู้ว่าลูกค้ามาจากช่องทางไหน)
+  (function () {
+    var q = window.location.search || '';
+    if (!q) return;
+    ['goBook', 'goStatus'].forEach(function (id) {
+      var a = document.getElementById(id);
+      if (a) a.href = a.href + '&' + q.replace(/^\?/, '');
+    });
+  })();
 </script>
 </body>
 </html>
